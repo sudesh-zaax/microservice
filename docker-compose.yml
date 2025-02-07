@@ -1,0 +1,129 @@
+# version: '3.8'
+services:
+  auth:
+    container_name: auth
+    image: insurance_auth
+    build:
+      context: ./services/auth/docker/${APP_AUTH_PHP_VERSION:-8.2}
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: '${WWWGROUP}'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '${APP_PORT:-80}:80'
+    volumes:
+      - ./services/auth:/var/www/html
+    env_file:
+      - ./services/auth/.env
+    environment:
+      WWWUSER: '${WWWUSER}'
+      XDEBUG_MODE: '${APP_AUTH_XDEBUG_MODE:-off}'
+      XDEBUG_CONFIG: '${APP_AUTH_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+      IGNITION_LOCAL_SITES_PATH: '${PWD}'
+      POLICY_SERVICE: policy
+    depends_on:
+      - redis
+      - auth-db
+    networks:
+      - auth-network
+      - unione-network
+
+  auth-db:
+    image: mysql:${APP_AUTH_DB_VERSION}
+    restart: always
+    ports:
+     - '${APP_AUTH_DB_PORT:-3306}:3306'
+    env_file:
+      - './services/auth/.env'
+    environment:
+        MYSQL_ROOT_PASSWORD: '${APP_AUTH_DB_ROOT_PASSWORD}'
+        MYSQL_ROOT_HOST: '${APP_AUTH_DB_ROOT_HOST}'
+        MYSQL_DATABASE: '${APP_AUTH_DB_DATABASE}'
+        MYSQL_USER: '${APP_AUTH_DB_USER}'
+        MYSQL_PASSWORD: '${APP_AUTH_DB_PASSWORD}'
+    volumes:
+        - './data/auth/dbdata:/var/lib/mysql'
+        - './services/auth/docker/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+    networks:
+        - auth-network
+    healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-p${APP_AUTH_DB_PASSWORD:-root}"]
+        retries: 3
+        timeout: 5s
+
+  policy:
+    container_name: polocy
+    image: insurance_policy
+    build:
+      context: ./services/policy/docker/${APP_POLICY_PHP_VERSION:-8.2}
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: '${WWWGROUP}'
+    volumes:
+      - ./services/policy:/var/www/html
+    env_file:
+      - ./services/policy/.env
+    environment:
+      WWWUSER: '${WWWUSER}'
+      XDEBUG_MODE: '${APP_POLICY_XDEBUG_MODE:-off}'
+      XDEBUG_CONFIG: '${APP_POLICY_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+      IGNITION_LOCAL_SITES_PATH: '${PWD}'
+      AUTH_SERVICE: auth
+    depends_on:
+      - redis
+      - policy-db
+    networks:
+      - policy-network
+      - unione-network
+
+  policy-db:
+    image: mysql:${APP_POLICY_DB_VERSION}
+    restart: always
+    ports:
+      - '${APP_POLICY_DB_PORT:-3307}:3306'
+    env_file:
+      - ./services/policy/.env
+    environment:
+       MYSQL_ROOT_PASSWORD: ${APP_POLICY_DB_ROOT_PASSWORD}
+       MYSQL_ROOT_HOST: ${APP_POLICY_DB_ROOT_HOST}
+       MYSQL_DATABASE: '${APP_POLICY_DB_DATABASE}'
+       MYSQL_USER: '${APP_POLICY_DB_USER}'
+       MYSQL_PASSWORD: '${APP_POLICY_DB_PASSWORD}'
+    volumes:
+        - './data/policy/dbdata:/var/lib/mysql'
+        - ./services/policy/docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+        - policy-network
+    healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-p${APP_POLICY_DB_PASSWORD}"]
+        retries: 3
+        timeout: 5s
+  
+  redis:
+    image: redis:${APP_REDIS_VERSION}
+    container_name: redis
+    ports:
+     - "${APP_REDIS_PORT:-6379}:6379"
+    volumes:
+     - redis-data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+     - unione-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      retries: 3
+      timeout: 5s
+
+networks:
+  auth-network:
+    driver: bridge
+  policy-network:
+    driver: bridge
+  unione-network:
+    driver: bridge
+
+volumes:
+  # auth-db-data:
+  policy-db-data:
+  redis-data:
