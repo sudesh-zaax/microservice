@@ -2,12 +2,13 @@
 services:
   auth:
     container_name: ${COMPOSE_PROJECT_NAME}-auth
+    restart: always
     image: ${COMPOSE_PROJECT_NAME}-auth:latest
     build:
       context: ./services/auth/docker/${APP_AUTH_PHP_VERSION:-8.2}
       dockerfile: Dockerfile
       args:
-        BUILD_ARGUMENT_ENV: dev
+        BUILD_ARGUMENT_ENV: prod
         WWWGROUP: '${WWWGROUP}'
     extra_hosts:
       - 'host.docker.internal:host-gateway'
@@ -19,12 +20,9 @@ services:
     env_file:
       - ./services/auth/.env
     environment:
-      XDEBUG_MODE: '${APP_AUTH_XDEBUG_MODE:-off}'
-      XDEBUG_CONFIG: '${APP_AUTH_XDEBUG_CONFIG:-client_host=host.docker.internal}'
       POLICY_SERVICE: policy
       REDIS_SERVICE: redis
     depends_on:
-      - mail
       - redis
       - auth-db
     networks:
@@ -34,46 +32,42 @@ services:
   auth-db:
     image: mysql:${APP_AUTH_DB_VERSION}
     container_name: ${COMPOSE_PROJECT_NAME}-auth-db
-    ports:
-     - '${APP_AUTH_DB_PORT:-3306}:3306'
+    restart: always
     env_file:
       - './services/auth/.env'
     environment:
-      MYSQL_ROOT_PASSWORD: '${APP_AUTH_DB_ROOT_PASSWORD}'
-      MYSQL_ROOT_HOST: '${APP_AUTH_DB_ROOT_HOST}'
-      MYSQL_DATABASE: '${APP_AUTH_DB_DATABASE}'
-      MYSQL_USER: '${APP_AUTH_DB_USER}'
-      MYSQL_PASSWORD: '${APP_AUTH_DB_PASSWORD}'
+        MYSQL_ROOT_PASSWORD: '${APP_AUTH_DB_ROOT_PASSWORD}'
+        MYSQL_ROOT_HOST: '${APP_AUTH_DB_ROOT_HOST}'
+        MYSQL_DATABASE: '${APP_AUTH_DB_DATABASE}'
+        MYSQL_USER: '${APP_AUTH_DB_USER}'
+        MYSQL_PASSWORD: '${APP_AUTH_DB_PASSWORD}'
     volumes:
-      - './data/auth/dbdata:/var/lib/mysql'
-      - './services/auth/docker/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+        - './data/auth/dbdata:/var/lib/mysql'
     networks:
-      - auth-network
+        - auth-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-p${APP_AUTH_DB_PASSWORD:-root}"]
-      retries: 3
-      timeout: 5s
+        test: ["CMD", "mysqladmin", "ping", "-p${APP_AUTH_DB_PASSWORD:-root}"]
+        retries: 3
+        timeout: 5s
 
   policy:
     container_name: ${COMPOSE_PROJECT_NAME}-policy
+    restart: always
     image: ${COMPOSE_PROJECT_NAME}-policy:latest
     build:
       context: ./services/policy/docker/${APP_POLICY_PHP_VERSION:-8.2}
       dockerfile: Dockerfile
       args:
-        BUILD_ARGUMENT_ENV: dev
+        BUILD_ARGUMENT_ENV: prod
         WWWGROUP: '${WWWGROUP}'
     volumes:
       - ./services/policy:/var/www/html
     env_file:
       - ./services/policy/.env
     environment:
-      XDEBUG_MODE: '${APP_POLICY_XDEBUG_MODE:-off}'
-      XDEBUG_CONFIG: '${APP_POLICY_XDEBUG_CONFIG:-client_host=host.docker.internal}'
       AUTH_SERVICE: auth
       REDIS_SERVICE: redis
     depends_on:
-      - mail
       - redis
       - policy-db
     networks:
@@ -84,8 +78,6 @@ services:
     image: mysql:${APP_POLICY_DB_VERSION}
     container_name: ${COMPOSE_PROJECT_NAME}-policy-db
     restart: always
-    ports:
-      - '${APP_POLICY_DB_PORT:-3307}:3306'
     env_file:
       - ./services/policy/.env
     environment:
@@ -96,7 +88,6 @@ services:
        MYSQL_PASSWORD: '${APP_POLICY_DB_PASSWORD}'
     volumes:
         - './data/policy/dbdata:/var/lib/mysql'
-        - ./services/policy/docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
         - policy-network
     healthcheck:
@@ -107,8 +98,7 @@ services:
   redis:
     image: redis:${APP_REDIS_VERSION}
     container_name: ${COMPOSE_PROJECT_NAME}-redis
-    ports:
-     - "${APP_REDIS_PORT:-6379}:6379"
+    restart: always
     volumes:
      - ./data/redis/dbdata:/data
     command: ["redis-server", "--appendonly", "yes"]
@@ -118,16 +108,6 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       retries: 3
       timeout: 5s
-
-  mail:
-    image: axllent/mailpit:latest
-    container_name: ${COMPOSE_PROJECT_NAME}-mail
-    restart: always
-    ports:
-      - "8025:8025"
-      - "1025:1025"
-    networks:
-      - unione-network
 
 networks:
   auth-network:

@@ -7,7 +7,7 @@ services:
       context: ./services/auth/docker/${APP_AUTH_PHP_VERSION:-8.2}
       dockerfile: Dockerfile
       args:
-        BUILD_ARGUMENT_ENV: dev
+        BUILD_ARGUMENT_ENV: test
         WWWGROUP: '${WWWGROUP}'
     extra_hosts:
       - 'host.docker.internal:host-gateway'
@@ -24,7 +24,6 @@ services:
       POLICY_SERVICE: policy
       REDIS_SERVICE: redis
     depends_on:
-      - mail
       - redis
       - auth-db
     networks:
@@ -34,25 +33,26 @@ services:
   auth-db:
     image: mysql:${APP_AUTH_DB_VERSION}
     container_name: ${COMPOSE_PROJECT_NAME}-auth-db
+    restart: always
     ports:
      - '${APP_AUTH_DB_PORT:-3306}:3306'
     env_file:
       - './services/auth/.env'
     environment:
-      MYSQL_ROOT_PASSWORD: '${APP_AUTH_DB_ROOT_PASSWORD}'
-      MYSQL_ROOT_HOST: '${APP_AUTH_DB_ROOT_HOST}'
-      MYSQL_DATABASE: '${APP_AUTH_DB_DATABASE}'
-      MYSQL_USER: '${APP_AUTH_DB_USER}'
-      MYSQL_PASSWORD: '${APP_AUTH_DB_PASSWORD}'
+        MYSQL_ROOT_PASSWORD: '${APP_AUTH_DB_ROOT_PASSWORD}'
+        MYSQL_ROOT_HOST: '${APP_AUTH_DB_ROOT_HOST}'
+        MYSQL_DATABASE: '${APP_AUTH_DB_DATABASE}'
+        MYSQL_USER: '${APP_AUTH_DB_USER}'
+        MYSQL_PASSWORD: '${APP_AUTH_DB_PASSWORD}'
     volumes:
-      - './data/auth/dbdata:/var/lib/mysql'
-      - './services/auth/docker/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+        - './data/auth/dbdata:/var/lib/mysql'
+        - './services/auth/docker/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
     networks:
-      - auth-network
+        - auth-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-p${APP_AUTH_DB_PASSWORD:-root}"]
-      retries: 3
-      timeout: 5s
+        test: ["CMD", "mysqladmin", "ping", "-p${APP_AUTH_DB_PASSWORD:-root}"]
+        retries: 3
+        timeout: 5s
 
   policy:
     container_name: ${COMPOSE_PROJECT_NAME}-policy
@@ -61,7 +61,7 @@ services:
       context: ./services/policy/docker/${APP_POLICY_PHP_VERSION:-8.2}
       dockerfile: Dockerfile
       args:
-        BUILD_ARGUMENT_ENV: dev
+        BUILD_ARGUMENT_ENV: test
         WWWGROUP: '${WWWGROUP}'
     volumes:
       - ./services/policy:/var/www/html
@@ -73,7 +73,6 @@ services:
       AUTH_SERVICE: auth
       REDIS_SERVICE: redis
     depends_on:
-      - mail
       - redis
       - policy-db
     networks:
@@ -118,16 +117,6 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       retries: 3
       timeout: 5s
-
-  mail:
-    image: axllent/mailpit:latest
-    container_name: ${COMPOSE_PROJECT_NAME}-mail
-    restart: always
-    ports:
-      - "8025:8025"
-      - "1025:1025"
-    networks:
-      - unione-network
 
 networks:
   auth-network:
