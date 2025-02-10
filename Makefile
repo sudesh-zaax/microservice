@@ -422,6 +422,31 @@ else
 	@echo "$(GREEN)Policy Service Cache Cleared$(NC)"
 endif
 
+# SSH Commands for Services
+ssh-auth: ## SSH into auth service container
+	@echo "$(BLUE)Connecting to Auth Service Container...$(NC)"
+	@docker compose -f docker/docker-compose.yml exec auth bash
+
+ssh-policy: ## SSH into policy service container
+	@echo "$(BLUE)Connecting to Policy Service Container...$(NC)"
+	@docker compose -f docker/docker-compose.yml exec policy bash
+
+ssh-auth-db: ## SSH into auth database container
+	@echo "$(BLUE)Connecting to Auth Database Container...$(NC)"
+	@docker compose -f docker/docker-compose.yml exec auth-db bash
+
+ssh-policy-db: ## SSH into policy database container
+	@echo "$(BLUE)Connecting to Policy Database Container...$(NC)"
+	@docker compose -f docker/docker-compose.yml exec policy-db bash
+
+ssh-redis: ## SSH into redis container
+	@echo "$(BLUE)Connecting to Redis Container...$(NC)"
+	@docker compose -f docker/docker-compose.yml exec redis sh
+
+ssh-mail: ## SSH into mail container
+	@echo "$(BLUE)Connecting to Mail Container...$(NC)"
+	@docker compose -f docker/docker-compose.yml exec mail sh
+
 # Combined Service Commands
 services-install: auth-install policy-install ## Install dependencies for all services
 services-update: auth-update policy-update ## Update dependencies for all services
