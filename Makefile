@@ -69,12 +69,17 @@ define CHECK_ENV_FILE
 endef
 
 debug-env: ## Debug environment variables
-	@echo "Environment Debug Information:"
+	@echo "$(BLUE)Environment Debug Information:$(NC)"
+	@printf "================================\n"
 	@echo "ENV = $(ENV)"
 	@echo "ENV_FILE = $(ENV_FILE)"
-	@echo "Current .env contents:"
+	@printf "\n"
+	@echo "$(BLUE)Current $(GREEN).env$(NC) contents:$(NC)"
+	@printf "================================\n"
 	@cat docker/.env
-	@echo "\nCurrent environment file (.env.$(ENV)) contents:"
+	@printf "\n"
+	@echo "$(BLUE)Current environment file $(GREEN)$(ENV)$(NC) (using $(ENV_FILE)) contents:"
+	@printf "================================\n"
 	@cat docker/.env.$(ENV)
 
 help: ## Shows available commands with description
@@ -120,11 +125,11 @@ validate-env: ## Validate environment setup
 
 status: ## Show status of all containers
 	@echo "$(BLUE)Container Status ($(ENV) environment):$(NC)"
-	@docker compose ps
+	@cd docker && docker compose ps
 
 logs: ## Show logs of all containers
 	@echo "$(BLUE)Container Logs ($(ENV) environment):$(NC)"
-	@docker compose logs --tail=100 -f
+	@cd docker && docker compose logs --tail=100 -f
 
 cleanup: ## Remove all unused containers, networks, and images
 	@echo "$(YELLOW)Cleaning up Docker resources...$(NC)"
