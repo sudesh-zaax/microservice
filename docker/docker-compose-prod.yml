@@ -5,7 +5,7 @@ services:
     restart: always
     image: ${COMPOSE_PROJECT_NAME}-auth:latest
     build:
-      context: ./services/auth/docker/${APP_AUTH_PHP_VERSION:-8.2}
+      context: ../services/auth/docker/${APP_AUTH_PHP_VERSION:-8.2}
       dockerfile: Dockerfile
       args:
         BUILD_ARGUMENT_ENV: prod
@@ -16,9 +16,9 @@ services:
       - '${APP_AUTH_PORT_HTTP:-80}:80'
       - '${APP_AUTH_PORT_SSL:-`443}:443'
     volumes:
-      - ./services/auth:/var/www/html
+      - ../services/auth:/var/www/html
     env_file:
-      - ./services/auth/.env
+      - ../services/auth/.env
     environment:
       POLICY_SERVICE: policy
       REDIS_SERVICE: redis
@@ -34,7 +34,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-auth-db
     restart: always
     env_file:
-      - './services/auth/.env'
+      - '../services/auth/.env'
     environment:
         MYSQL_ROOT_PASSWORD: '${APP_AUTH_DB_ROOT_PASSWORD}'
         MYSQL_ROOT_HOST: '${APP_AUTH_DB_ROOT_HOST}'
@@ -42,7 +42,7 @@ services:
         MYSQL_USER: '${APP_AUTH_DB_USER}'
         MYSQL_PASSWORD: '${APP_AUTH_DB_PASSWORD}'
     volumes:
-        - './data/auth/dbdata:/var/lib/mysql'
+        - '../data/auth/dbdata:/var/lib/mysql'
     networks:
         - auth-network
     healthcheck:
@@ -55,15 +55,15 @@ services:
     restart: always
     image: ${COMPOSE_PROJECT_NAME}-policy:latest
     build:
-      context: ./services/policy/docker/${APP_POLICY_PHP_VERSION:-8.2}
+      context: ../services/policy/docker/${APP_POLICY_PHP_VERSION:-8.2}
       dockerfile: Dockerfile
       args:
         BUILD_ARGUMENT_ENV: prod
         WWWGROUP: '${WWWGROUP}'
     volumes:
-      - ./services/policy:/var/www/html
+      - ../services/policy:/var/www/html
     env_file:
-      - ./services/policy/.env
+      - ../services/policy/.env
     environment:
       AUTH_SERVICE: auth
       REDIS_SERVICE: redis
@@ -79,7 +79,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-policy-db
     restart: always
     env_file:
-      - ./services/policy/.env
+      - ../services/policy/.env
     environment:
        MYSQL_ROOT_PASSWORD: ${APP_POLICY_DB_ROOT_PASSWORD}
        MYSQL_ROOT_HOST: ${APP_POLICY_DB_ROOT_HOST}
@@ -87,7 +87,7 @@ services:
        MYSQL_USER: '${APP_POLICY_DB_USER}'
        MYSQL_PASSWORD: '${APP_POLICY_DB_PASSWORD}'
     volumes:
-        - './data/policy/dbdata:/var/lib/mysql'
+        - '../data/policy/dbdata:/var/lib/mysql'
     networks:
         - policy-network
     healthcheck:
@@ -100,7 +100,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-redis
     restart: always
     volumes:
-     - ./data/redis/dbdata:/data
+     - ../data/redis/dbdata:/data
     command: ["redis-server", "--appendonly", "yes"]
     networks:
      - unione-network

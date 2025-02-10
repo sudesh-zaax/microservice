@@ -1,13 +1,13 @@
 # Environment handling
 # Read current environment from .env file if it exists, otherwise default to dev
-ENV := $(shell if [ -f .env ]; then grep COMPOSE_PROJECT_NAME .env | sed 's/.*_\(.*\)/\1/'; else echo "dev"; fi)
-ENV_FILE := .env.$(ENV)
+ENV := $(shell if [ -f docker/.env ]; then grep COMPOSE_PROJECT_NAME docker/.env | sed 's/.*_\(.*\)/\1/'; else echo "dev"; fi)
+ENV_FILE := docker/.env.$(ENV)
 
 # Include environment files
 ifneq ("$(wildcard $(ENV_FILE))","")
 	include $(ENV_FILE)
-else ifneq ("$(wildcard .env)","")
-	include .env
+else ifneq ("$(wildcard docker/.env)","")
+	include docker/.env
 endif
 
 # Declare phony targets
@@ -40,29 +40,29 @@ NC := \033[39m
 define ENV_VARS
 	$(shell if [ -f $(ENV_FILE) ]; then \
 		export $$(grep -v '^#' $(ENV_FILE) | xargs); \
-	elif [ -f .env ]; then \
-		export $$(grep -v '^#' .env | xargs); \
+	elif [ -f docker/.env ]; then \
+		export $$(grep -v '^#' docker/.env | xargs); \
 	fi)
 endef
 
 define DOCKER_BUILD
-	@$(ENV_VARS) docker compose -f $1 build
+	@$(ENV_VARS) docker compose -f docker/$1 build
 endef
 
 define DOCKER_START
-	@$(ENV_VARS) docker compose -f $1 $(PROJECT_NAME) up -d
+	@$(ENV_VARS) docker compose -f docker/$1 $(PROJECT_NAME) up -d
 endef
 
 define DOCKER_STOP
-	@$(ENV_VARS) docker compose -f $1 $(PROJECT_NAME) stop
+	@$(ENV_VARS) docker compose -f docker/$1 $(PROJECT_NAME) stop
 endef
 
 define DOCKER_DOWN
-	@$(ENV_VARS) docker compose -f $1 $(PROJECT_NAME) down
+	@$(ENV_VARS) docker compose -f docker/$1 $(PROJECT_NAME) down
 endef
 
 define CHECK_ENV_FILE
-	@if [ ! -f $(ENV_FILE) ] && [ ! -f .env ]; then \
+	@if [ ! -f $(ENV_FILE) ] && [ ! -f docker/.env ]; then \
 		$(ERROR_ENV_FILE_MISSING); \
 		exit 1; \
 	fi
@@ -73,9 +73,9 @@ debug-env: ## Debug environment variables
 	@echo "ENV = $(ENV)"
 	@echo "ENV_FILE = $(ENV_FILE)"
 	@echo "Current .env contents:"
-	@cat .env
+	@cat docker/.env
 	@echo "\nCurrent environment file (.env.$(ENV)) contents:"
-	@cat .env.$(ENV)
+	@cat docker/.env.$(ENV)
 
 help: ## Shows available commands with description
 	@echo "$(BLUE)List of available commands:$(NC)"
@@ -86,12 +86,12 @@ use-env: ## Switch to a specific environment (usage: make use-env ENV=dev|test|s
 	@echo "$(BLUE)Switching environment...$(NC)"
 	@echo "$(BLUE)Requested environment: $(GREEN)$(ENV)$(NC)"
 	@echo "$(BLUE)Looking for file: $(GREEN).env.$(ENV)$(NC)"
-	@if [ -f .env.$(ENV) ]; then \
-		cp .env.$(ENV) .env; \
-		echo "$(GREEN)✓ Copied .env.$(ENV) to .env$(NC)"; \
+	@if [ -f docker/.env.$(ENV) ]; then \
+		cp docker/.env.$(ENV) docker/.env; \
+		echo "$(GREEN)✓ Copied docker/.env.$(ENV) to docker/.env$(NC)"; \
 		echo "$(GREEN)✓ Switched to $(ENV) environment using $(ENV_FILE)$(NC)"; \
 		echo "$(BLUE)Current .env contents:$(NC)"; \
-		cat .env | grep "COMPOSE_PROJECT_NAME"; \
+		cat docker/.env | grep "COMPOSE_PROJECT_NAME"; \
 	else \
 		echo "$(RED)Error: .env.$(ENV) file not found$(NC)"; \
 		exit 1; \
@@ -102,7 +102,7 @@ validate-env: ## Validate environment setup
 	@printf "================================\n"
 	@printf "$(BLUE)Active Environment:$(NC) $(GREEN)$(ENV)$(NC)\n"
 	@printf "$(BLUE)Environment File:$(NC) $(GREEN)$(ENV_FILE)$(NC)\n"
-	@printf "$(BLUE)Project Name:$(NC) $(GREEN)$(shell grep COMPOSE_PROJECT_NAME .env | cut -d'=' -f2)$(NC)\n"
+	@printf "$(BLUE)Project Name:$(NC) $(GREEN)$(shell grep COMPOSE_PROJECT_NAME docker/.env | cut -d'=' -f2)$(NC)\n"
 	@printf "================================\n"
 	$(CHECK_ENV_FILE)
 	@if [ -f $(ENV_FILE) ]; then \
