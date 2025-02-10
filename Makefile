@@ -279,3 +279,152 @@ restart: stop start ## Stop and start dev environment
 restart-test: stop-test start-test ## Stop and start test or continuous integration environment
 restart-staging: stop-staging start-staging ## Stop and start staging environment
 restart-prod: stop-prod start-prod ## Stop and start prod environment
+
+# Auth Microservice Commands
+auth-install: ## Install composer dependencies for auth service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Installing Auth Service Dependencies (Inside Container)...$(NC)"
+	@cd services/auth && composer install
+	@echo "$(GREEN)Auth Service Dependencies Installed$(NC)"
+else
+	@echo "$(BLUE)Installing Auth Service Dependencies (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html auth composer install
+	@echo "$(GREEN)Auth Service Dependencies Installed$(NC)"
+endif
+
+auth-update: ## Update composer dependencies for auth service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Updating Auth Service Dependencies (Inside Container)...$(NC)"
+	@cd services/auth && composer update
+	@echo "$(GREEN)Auth Service Dependencies Updated$(NC)"
+else
+	@echo "$(BLUE)Updating Auth Service Dependencies (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html auth composer update
+	@echo "$(GREEN)Auth Service Dependencies Updated$(NC)"
+endif
+
+auth-migrate: ## Run migrations for auth service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Running Auth Service Migrations (Inside Container)...$(NC)"
+	@cd services/auth && php artisan migrate
+	@echo "$(GREEN)Auth Service Migrations Completed$(NC)"
+else
+	@echo "$(BLUE)Running Auth Service Migrations (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html auth php artisan migrate
+	@echo "$(GREEN)Auth Service Migrations Completed$(NC)"
+endif
+
+auth-seed: ## Run seeders for auth service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Running Auth Service Seeders (Inside Container)...$(NC)"
+	@cd services/auth && php artisan db:seed
+	@echo "$(GREEN)Auth Service Seeders Completed$(NC)"
+else
+	@echo "$(BLUE)Running Auth Service Seeders (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html auth php artisan db:seed
+	@echo "$(GREEN)Auth Service Seeders Completed$(NC)"
+endif
+
+auth-key: ## Generate application key for auth service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Generating Auth Service Application Key (Inside Container)...$(NC)"
+	@cd services/auth && php artisan key:generate
+	@echo "$(GREEN)Auth Service Application Key Generated$(NC)"
+else
+	@echo "$(BLUE)Generating Auth Service Application Key (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html auth php artisan key:generate
+	@echo "$(GREEN)Auth Service Application Key Generated$(NC)"
+endif
+
+auth-cache: ## Clear cache for auth service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Clearing Auth Service Cache (Inside Container)...$(NC)"
+	@cd services/auth && php artisan cache:clear
+	@cd services/auth && php artisan config:clear
+	@cd services/auth && php artisan route:clear
+	@echo "$(GREEN)Auth Service Cache Cleared$(NC)"
+else
+	@echo "$(BLUE)Clearing Auth Service Cache (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html auth php artisan cache:clear
+	@cd services/auth && docker compose exec -w /var/www/html auth php artisan config:clear
+	@cd services/auth && docker compose exec -w /var/www/html auth php artisan route:clear
+	@echo "$(GREEN)Auth Service Cache Cleared$(NC)"
+endif
+
+# Policy Microservice Commands
+policy-install: ## Install composer dependencies for policy service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Installing Policy Service Dependencies (Inside Container)...$(NC)"
+	@cd services/policy && composer install
+	@echo "$(GREEN)Policy Service Dependencies Installed$(NC)"
+else
+	@echo "$(BLUE)Installing Policy Service Dependencies (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html policy composer install
+	@echo "$(GREEN)Policy Service Dependencies Installed$(NC)"
+endif
+
+policy-update: ## Update composer dependencies for policy service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Updating Policy Service Dependencies (Inside Container)...$(NC)"
+	@cd services/policy && composer update
+	@echo "$(GREEN)Policy Service Dependencies Updated$(NC)"
+else
+	@echo "$(BLUE)Updating Policy Service Dependencies (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html policy composer update
+	@echo "$(GREEN)Policy Service Dependencies Updated$(NC)"
+endif
+
+policy-migrate: ## Run migrations for policy service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Running Policy Service Migrations (Inside Container)...$(NC)"
+	@cd services/policy && php artisan migrate
+	@echo "$(GREEN)Policy Service Migrations Completed$(NC)"
+else
+	@echo "$(BLUE)Running Policy Service Migrations (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html policy php artisan migrate
+	@echo "$(GREEN)Policy Service Migrations Completed$(NC)"
+endif
+
+policy-seed: ## Run seeders for policy service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Running Policy Service Seeders (Inside Container)...$(NC)"
+	@cd services/policy && php artisan db:seed
+	@echo "$(GREEN)Policy Service Seeders Completed$(NC)"
+else
+	@echo "$(BLUE)Running Policy Service Seeders (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html policy php artisan db:seed
+	@echo "$(GREEN)Policy Service Seeders Completed$(NC)"
+endif
+
+policy-key: ## Generate application key for policy service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Generating Policy Service Application Key (Inside Container)...$(NC)"
+	@cd services/policy && php artisan key:generate
+	@echo "$(GREEN)Policy Service Application Key Generated$(NC)"
+else
+	@echo "$(BLUE)Generating Policy Service Application Key (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html policy php artisan key:generate
+	@echo "$(GREEN)Policy Service Application Key Generated$(NC)"
+endif
+
+policy-cache: ## Clear cache for policy service
+ifeq ($(INSIDE_DOCKER_CONTAINER), 0)
+	@echo "$(BLUE)Clearing Policy Service Cache (Inside Container)...$(NC)"
+	@cd services/policy && php artisan cache:clear
+	@cd services/policy && php artisan config:clear
+	@cd services/policy && php artisan route:clear
+	@echo "$(GREEN)Policy Service Cache Cleared$(NC)"
+else
+	@echo "$(BLUE)Clearing Policy Service Cache (Docker)...$(NC)"
+	@cd services/auth && docker compose exec -w /var/www/html policy php artisan cache:clear
+	@cd services/auth && docker compose exec -w /var/www/html policy php artisan config:clear
+	@cd services/auth && docker compose exec -w /var/www/html policy php artisan route:clear
+	@echo "$(GREEN)Policy Service Cache Cleared$(NC)"
+endif
+
+# Combined Service Commands
+services-install: auth-install policy-install ## Install dependencies for all services
+services-update: auth-update policy-update ## Update dependencies for all services
+services-migrate: auth-migrate policy-migrate ## Run migrations for all services
+services-seed: auth-seed policy-seed ## Run seeders for all services
+services-cache: auth-cache policy-cache ## Clear cache for all services
