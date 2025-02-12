@@ -13,7 +13,7 @@ services:
       - 'host.docker.internal:host-gateway'
     ports:
       - '${APP_AUTH_PORT_HTTP:-80}:80'
-      - '${APP_AUTH_PORT_SSL:-`443}:443'
+      - '${APP_AUTH_PORT_SSL:-443}:443'
     volumes:
       - ../services/auth:/var/www/html
     env_file:
