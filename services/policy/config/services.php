@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'auth' => [
+        'url' => env('AUTH_SERVICE', 'http://auth'),
+        'timeout' => env('AUTH_SERVICE_TIMEOUT', 30),
+        'verify_ssl' => env('AUTH_SERVICE_VERIFY_SSL', true),
+    ],
+
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\PolicyServiceClient;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,7 +13,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(PolicyServiceClient::class, function ($app) {
+            return new PolicyServiceClient();
+        });
     }
 
     /**

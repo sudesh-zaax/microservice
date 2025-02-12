@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'policy' => [
+        'url' => env('POLICY_SERVICE', 'http://policy'),
+        'timeout' => env('POLICY_SERVICE_TIMEOUT', 30),
+        'verify_ssl' => env('POLICY_SERVICE_VERIFY_SSL', true),
+    ],
+    
 ];
