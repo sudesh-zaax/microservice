@@ -37,10 +37,10 @@ class MenuController extends Controller
 	}
 	/**
 	 * Summary of getPageContent
-	 * @param mixed $permission_id
+	 * @param int $permission_id
 	 * @return \Illuminate\Http\JsonResponse
 	 */
-	public function getPageContent($permission_id): JsonResponse
+	public function getPageContent(int $permission_id): JsonResponse
 	{
 		try {
 			$dataArr = $this->menuRepository->getPageContent($permission_id);

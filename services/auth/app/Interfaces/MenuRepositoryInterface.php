@@ -13,7 +13,7 @@ interface MenuRepositoryInterface
   /**
    * Summary of getPageContent
    * @param int $page_id
-   * @return void
+   * @return array
    */
   public function getPageContent(int $page_id):array;
 

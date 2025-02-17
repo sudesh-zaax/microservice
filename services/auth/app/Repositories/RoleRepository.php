@@ -22,8 +22,8 @@ class RoleRepository implements RoleRepositoryInterface
 	public function getRoleList($request, $page, $limit): array
 	{
 		try {
-			$filtersArray = $request->columnFilters ?? '';
-			$sortingArray = $request->sorting ?? '';
+			$filtersArray = json_decode($request->columnFilters, true) ?? [];
+			$sortingArray = json_decode($request->sorting, true) ?? '';
 
 			$roleDataQry = Role::where('guard_name', 'admin')->where('is_active', 1);
 
@@ -83,7 +83,7 @@ class RoleRepository implements RoleRepositoryInterface
 			];
 
 		} catch (\Exception $e) {
-			Log::error('get Role Error: ' . $e->getMessage());
+			Log::error($e);
 			return array('status' => 'failed', 'message' => $e->getMessage());
 		}
 	}

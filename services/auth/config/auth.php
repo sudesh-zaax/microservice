@@ -35,13 +35,24 @@ return [
     |
     */
 
-    'guards' => [
+'guards' => [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
         ],
+		'admin' => [
+			'driver' => 'passport',
+			'provider' => 'users',
+		],
+		'agent' => [
+			'driver' => 'passport',
+			'provider' => 'users',
+		],
+		'customer' => [
+			'driver' => 'passport',
+			'provider' => 'users',
+		],
     ],
-
     /*
     |--------------------------------------------------------------------------
     | User Providers

@@ -69,10 +69,10 @@ class MenuRepository implements MenuRepositoryInterface
 
 		/**
 		 * Summary of getPageContent
-		 * @param mixed $permission_id
+		 * @param int $page_id
 		 * @return array
 		 */
-		public function getPageContent(int $page_id):array
+		public function getPageContent(int $page_id) :array
 		{
 			try{
 				$user = auth('admin')->user();
