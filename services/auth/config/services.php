@@ -40,5 +40,11 @@ return [
         'timeout' => env('POLICY_SERVICE_TIMEOUT', 30),
         'verify_ssl' => env('POLICY_SERVICE_VERIFY_SSL', true),
     ],
+
+    'auth' => [
+        'url' => env('AUTH_SERVICE', 'http://auth'),
+        'timeout' => env('AUTH_SERVICE_TIMEOUT', 30),
+        'verify_ssl' => env('AUTH_SERVICE_VERIFY_SSL', true),
+    ],
     
 ];
