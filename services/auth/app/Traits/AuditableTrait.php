@@ -1,6 +1,7 @@
 <?php
 namespace App\Traits;
 
+use App\Models\AuditLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,7 +30,7 @@ trait AuditableTrait
 			$user_type=get_class(Auth::user());
 			$user_id=Auth::id();
 		}
-        $auditLog = new \App\Models\AuditLog();
+        $auditLog = new AuditLog();
         $auditLog->user_type = $user_type;
         $auditLog->user_id = $user_id;
         $auditLog->event = $event;

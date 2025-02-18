@@ -10,8 +10,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use App\Models\UserDetail;
 use Illuminate\Support\Carbon;
-use Modules\Customer\Jobs\SendMailToGenerateOtp;
-use Modules\Customer\Jobs\SendResetPasswordNotification;
 use Str;
 
 class AuthenticationRepository implements AuthenticationRepositoryInterface
